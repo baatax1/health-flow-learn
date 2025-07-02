@@ -81,7 +81,12 @@ const Index = () => {
   };
 
   if (appState === "welcome") {
-    const adaptiveText = getAdaptiveText(null) as any;
+    // Default text for welcome state
+    const adaptiveText = {
+      heroTitle: "Personalized Health",
+      heroSubtitle: "Master health concepts through adaptive learning powered by behavioral science. Get a personalized curriculum that matches your unique learning style.",
+      startButton: "Start Your Assessment"
+    };
     
     return (
       <div className="min-h-screen bg-background">
@@ -95,20 +100,31 @@ const Index = () => {
           
           <div className="relative max-w-6xl mx-auto px-6 py-24 text-center">
             <div className="max-w-4xl mx-auto animate-fade-in-up">
-              <h1 className="text-6xl md:text-7xl font-bold text-foreground mb-8 leading-none tracking-tight" style={{ lineHeight: '1.1' }}>
+              <h1 className="text-6xl md:text-7xl font-bold text-foreground mb-8 tracking-tight" style={{ lineHeight: '1.2' }}>
                 {adaptiveText.heroTitle}
-                <span className="block bg-gradient-hero bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]">
+                <span className="block bg-gradient-hero bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]" style={{ lineHeight: '1.2' }}>
                   Learning Journey
                 </span>
               </h1>
               <p className="text-2xl text-muted-foreground mb-12 leading-relaxed font-light max-w-3xl mx-auto">
                 {adaptiveText.heroSubtitle}
               </p>
+              
+              {/* Inspirational pre-assessment text */}
+              <div className="mb-8 p-6 bg-gradient-glass backdrop-blur-xl shadow-glass border border-white/10 max-w-2xl mx-auto" style={{ borderRadius: '20px' }}>
+                <p className="text-lg text-foreground mb-4 font-medium">
+                  🌟 Ready to transform your health knowledge?
+                </p>
+                <p className="text-muted-foreground leading-relaxed">
+                  Take our quick 2-minute assessment to discover your unique learning style and unlock a personalized health education experience designed just for you.
+                </p>
+              </div>
+              
               <Button 
                 variant="apple-primary" 
                 size="xl"
                 onClick={handleStartAssessment}
-                className="text-2xl px-12 py-6 h-auto shadow-glow hover:shadow-large animate-bounce-gentle"
+                className="text-xl px-12 py-6 h-auto shadow-glow hover:shadow-large animate-bounce-gentle"
               >
                 {adaptiveText.startButton}
               </Button>
