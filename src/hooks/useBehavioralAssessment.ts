@@ -7,6 +7,11 @@ export interface AssessmentResult {
   challengeLevel: "high" | "medium" | "low";
   socialLearning: "individual" | "group" | "mixed";
   timePreference: "short" | "medium" | "long";
+  // New UX preferences
+  techComfort: "high" | "medium" | "low";
+  interfaceStyle: "premium" | "simple" | "accessible";
+  accessibilityNeeds: "none" | "visual" | "cognitive" | "motor";
+  literacyLevel: "high" | "medium" | "basic";
 }
 
 const assessmentQuestions = [
@@ -18,6 +23,46 @@ const assessmentQuestions = [
       { id: "b", text: "Listen to explanations and discussions", value: 2 },
       { id: "c", text: "Practice hands-on activities and experiments", value: 3 },
       { id: "d", text: "Read detailed written instructions", value: 4 },
+    ]
+  },
+  {
+    id: "tech-comfort",
+    question: "How comfortable are you with technology and apps?",
+    options: [
+      { id: "a", text: "Very comfortable - I love trying new features", value: 3 },
+      { id: "b", text: "Somewhat comfortable - I can figure things out", value: 2 },
+      { id: "c", text: "Basic comfort - I prefer simple, familiar interfaces", value: 1 },
+      { id: "d", text: "I need help with technology sometimes", value: 1 },
+    ]
+  },
+  {
+    id: "interface-preference",
+    question: "Which type of app design do you prefer?",
+    options: [
+      { id: "a", text: "Sleek, modern design with lots of features", value: 3 },
+      { id: "b", text: "Clean, simple design that's easy to navigate", value: 2 },
+      { id: "c", text: "Large buttons and text that's easy to see", value: 1 },
+      { id: "d", text: "Whatever works best - I don't have a preference", value: 2 },
+    ]
+  },
+  {
+    id: "reading-preference",
+    question: "When reading health information, you prefer:",
+    options: [
+      { id: "a", text: "Detailed explanations with medical terminology", value: 3 },
+      { id: "b", text: "Clear explanations in everyday language", value: 2 },
+      { id: "c", text: "Simple, easy-to-understand descriptions", value: 1 },
+      { id: "d", text: "Visual guides with minimal text", value: 1 },
+    ]
+  },
+  {
+    id: "accessibility-needs",
+    question: "Do you have any preferences that would help you learn better?",
+    options: [
+      { id: "a", text: "I'd like larger text and buttons", value: 1 },
+      { id: "b", text: "I'd prefer audio options when available", value: 2 },
+      { id: "c", text: "I need more time to read and process information", value: 3 },
+      { id: "d", text: "Standard options work fine for me", value: 4 },
     ]
   },
   {
@@ -51,16 +96,6 @@ const assessmentQuestions = [
     ]
   },
   {
-    id: "social-1",
-    question: "Your ideal learning environment includes:",
-    options: [
-      { id: "a", text: "Self-paced individual study", value: 1 },
-      { id: "b", text: "Group discussions and collaborative learning", value: 2 },
-      { id: "c", text: "Mix of individual and group activities", value: 3 },
-      { id: "d", text: "One-on-one guidance with personalized feedback", value: 1 },
-    ]
-  },
-  {
     id: "time-1",
     question: "How much time do you typically have for learning sessions?",
     options: [
@@ -89,7 +124,7 @@ export function useBehavioralAssessment() {
   };
 
   const calculateResults = (): AssessmentResult => {
-    // Simple algorithm to determine learning preferences
+    // Enhanced algorithm to determine learning preferences and UX needs
     const learningStyleScores = { visual: 0, auditory: 0, kinesthetic: 0, reading: 0 };
     const styles = ["visual", "auditory", "kinesthetic", "reading"] as const;
     
@@ -97,20 +132,39 @@ export function useBehavioralAssessment() {
       learningStyleScores[styles[answers[0] - 1]]++;
     }
 
-    const motivationScore = answers[1] || 1;
-    const paceScore = answers[2] || 2;
-    const challengeScore = answers[3] || 2;
-    const socialScore = answers[4] || 1;
-    const timeScore = answers[5] || 2;
+    // Extract scores for new UX dimensions
+    const techComfortScore = answers[1] || 2;
+    const interfaceScore = answers[2] || 2;
+    const literacyScore = answers[3] || 2;
+    const accessibilityScore = answers[4] || 4;
+    const motivationScore = answers[5] || 1;
+    const paceScore = answers[6] || 2;
+    const challengeScore = answers[7] || 2;
+    const timeScore = answers[8] || 2;
+
+    // Determine interface style based on multiple factors
+    const determineInterfaceStyle = () => {
+      if (accessibilityScore <= 2 || literacyScore === 1 || techComfortScore === 1) {
+        return "accessible";
+      } else if (interfaceScore === 2 || techComfortScore === 2) {
+        return "simple";
+      } else {
+        return "premium";
+      }
+    };
 
     return {
       learningStyle: Object.entries(learningStyleScores).reduce((a, b) => 
         learningStyleScores[a[0] as keyof typeof learningStyleScores] > learningStyleScores[b[0] as keyof typeof learningStyleScores] ? a : b
       )[0] as AssessmentResult["learningStyle"],
+      techComfort: techComfortScore === 1 ? "low" : techComfortScore === 2 ? "medium" : "high",
+      interfaceStyle: determineInterfaceStyle(),
+      accessibilityNeeds: accessibilityScore === 1 ? "visual" : accessibilityScore === 2 ? "visual" : accessibilityScore === 3 ? "cognitive" : "none",
+      literacyLevel: literacyScore === 1 ? "basic" : literacyScore === 2 ? "medium" : "high",
       motivation: motivationScore === 1 ? "intrinsic" : motivationScore === 2 ? "extrinsic" : "mixed",
       pacePreference: paceScore === 1 ? "fast" : paceScore === 2 ? "moderate" : "slow",
       challengeLevel: challengeScore === 1 ? "low" : challengeScore === 2 ? "medium" : "high",
-      socialLearning: socialScore === 1 ? "individual" : socialScore === 2 ? "group" : "mixed",
+      socialLearning: "individual", // Simplified for now
       timePreference: timeScore === 1 ? "short" : timeScore === 2 ? "medium" : "long",
     };
   };

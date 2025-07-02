@@ -5,6 +5,8 @@ import { QuizCard } from "@/components/QuizCard";
 import { ProgressCard } from "@/components/ProgressCard";
 import { LearningPathCard } from "@/components/LearningPathCard";
 import { useBehavioralAssessment, type AssessmentResult } from "@/hooks/useBehavioralAssessment";
+import { learningModules, getAdaptedContent } from "@/data/learningContent";
+import { getUIConfig, getButtonVariant, getLanguageStyle } from "@/utils/adaptiveUI";
 import { Brain, Heart, Activity, Users, BookOpen, Target } from "lucide-react";
 import heroImage from "@/assets/hero-health.jpg";
 
@@ -36,43 +38,51 @@ const Index = () => {
   };
 
   const getPersonalizedLearningPaths = (profile: AssessmentResult) => {
-    return [
-      {
-        title: "Cardiovascular Health Fundamentals",
-        description: "Understanding heart health, blood pressure, and circulation basics tailored to your learning style.",
-        progress: 0,
-        status: "available" as const,
-        estimatedTime: profile.timePreference === "short" ? "15 min" : profile.timePreference === "medium" ? "25 min" : "40 min",
-        lessons: profile.challengeLevel === "high" ? 8 : profile.challengeLevel === "medium" ? 6 : 4,
-      },
-      {
-        title: "Nutrition Science & Meal Planning",
-        description: "Evidence-based nutrition principles with practical meal planning strategies.",
-        progress: 0,
-        status: "available" as const,
-        estimatedTime: profile.timePreference === "short" ? "20 min" : profile.timePreference === "medium" ? "30 min" : "45 min",
-        lessons: profile.challengeLevel === "high" ? 10 : profile.challengeLevel === "medium" ? 7 : 5,
-      },
-      {
-        title: "Exercise Physiology & Movement",
-        description: "How your body responds to exercise and creating sustainable fitness routines.",
-        progress: 0,
-        status: "locked" as const,
-        estimatedTime: "25 min",
-        lessons: 6,
-      },
-      {
-        title: "Mental Health & Stress Management",
-        description: "Psychological wellness, stress reduction techniques, and emotional regulation.",
-        progress: 0,
-        status: "locked" as const,
-        estimatedTime: "30 min",
-        lessons: 8,
-      },
-    ];
+    const uiConfig = getUIConfig(profile);
+    const language = getLanguageStyle(profile);
+    
+    return learningModules.map((module, index) => ({
+      id: module.id,
+      title: module.title,
+      description: module.description,
+      progress: 0,
+      status: index === 0 ? "available" as const : "locked" as const,
+      estimatedTime: module.duration,
+      lessons: module.lessons.length,
+      content: module.lessons.map(lesson => ({
+        ...lesson,
+        adaptedContent: getAdaptedContent(lesson.content, profile)
+      })),
+      onStart: () => {
+        console.log(`Starting: ${module.title} (adapted for ${profile.interfaceStyle} interface)`);
+      }
+    }));
+  };
+
+  const getAdaptiveText = (profile: AssessmentResult | null) => {
+    if (!profile) return {};
+    
+    const language = getLanguageStyle(profile);
+    
+    return {
+      heroTitle: language.simple ? "Learn About Health" : language.standard ? "Your Health Learning Journey" : "Personalized Health Learning Journey",
+      heroSubtitle: language.simple 
+        ? "Learn how to stay healthy. Easy lessons just for you." 
+        : language.standard 
+        ? "Learn health topics that match how you like to learn."
+        : "Master health concepts through adaptive learning powered by behavioral science. Get a personalized curriculum that matches your unique learning style.",
+      startButton: language.simple ? "Start" : language.standard ? "Begin Assessment" : "Start Your Assessment",
+      welcomeText: language.simple
+        ? "Welcome! Let's start learning."
+        : language.standard
+        ? "Welcome to your personalized learning space"
+        : "Welcome to Your Personalized Learning Dashboard"
+    };
   };
 
   if (appState === "welcome") {
+    const adaptiveText = getAdaptiveText(null) as any;
+    
     return (
       <div className="min-h-screen bg-background">
         {/* Hero Section */}
@@ -85,15 +95,14 @@ const Index = () => {
           
           <div className="relative max-w-6xl mx-auto px-6 py-24 text-center">
             <div className="max-w-4xl mx-auto animate-fade-in-up">
-              <h1 className="text-6xl md:text-7xl font-bold text-foreground mb-8 leading-none tracking-tight">
-                Personalized Health
+              <h1 className="text-6xl md:text-7xl font-bold text-foreground mb-8 leading-none tracking-tight" style={{ lineHeight: '1.1' }}>
+                {adaptiveText.heroTitle}
                 <span className="block bg-gradient-hero bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]">
                   Learning Journey
                 </span>
               </h1>
               <p className="text-2xl text-muted-foreground mb-12 leading-relaxed font-light max-w-3xl mx-auto">
-                Master health concepts through adaptive learning powered by behavioral science. 
-                Get a personalized curriculum that matches your unique learning style.
+                {adaptiveText.heroSubtitle}
               </p>
               <Button 
                 variant="apple-primary" 
@@ -101,7 +110,7 @@ const Index = () => {
                 onClick={handleStartAssessment}
                 className="text-2xl px-12 py-6 h-auto shadow-glow hover:shadow-large animate-bounce-gentle"
               >
-                Start Your Assessment
+                {adaptiveText.startButton}
               </Button>
             </div>
           </div>
@@ -161,6 +170,9 @@ const Index = () => {
 
   if (appState === "dashboard" && userProfile) {
     const learningPaths = getPersonalizedLearningPaths(userProfile);
+    const uiConfig = getUIConfig(userProfile);
+    const adaptiveText = getAdaptiveText(userProfile);
+    const buttonVariant = getButtonVariant(userProfile);
 
     return (
       <div className="min-h-screen bg-background">
@@ -168,8 +180,10 @@ const Index = () => {
         <header className="border-b border-border bg-card shadow-card">
           <div className="max-w-6xl mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold text-foreground">HealthLearn</h1>
-              <Button variant="health-outline" onClick={() => setAppState("welcome")}>
+              <h1 className={`text-2xl font-bold text-foreground ${uiConfig.fontSize === "xl" ? "text-4xl" : uiConfig.fontSize === "lg" ? "text-3xl" : ""}`}>
+                HealthLearn
+              </h1>
+              <Button variant={buttonVariant} size={uiConfig.buttonSize} onClick={() => setAppState("welcome")}>
                 Reset Assessment
               </Button>
             </div>
@@ -178,11 +192,11 @@ const Index = () => {
 
         <div className="max-w-6xl mx-auto px-6 py-8">
           {/* Welcome Section */}
-          <div className="mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">
-              Welcome to Your Personalized Learning Dashboard
+          <div className={`mb-12 ${uiConfig.spacing === "loose" ? "mb-16" : ""}`}>
+            <h2 className={`font-bold text-foreground mb-4 ${uiConfig.fontSize === "xl" ? "text-5xl" : uiConfig.fontSize === "lg" ? "text-4xl" : "text-3xl"}`}>
+              {adaptiveText.welcomeText}
             </h2>
-            <p className="text-muted-foreground text-lg">
+            <p className={`text-muted-foreground ${uiConfig.fontSize === "xl" ? "text-2xl" : uiConfig.fontSize === "lg" ? "text-xl" : "text-lg"}`}>
               Based on your assessment, we've customized your learning experience for{" "}
               <span className="font-medium text-primary">{userProfile.learningStyle}</span> learning with{" "}
               <span className="font-medium text-primary">{userProfile.challengeLevel}</span> challenge level.
@@ -222,17 +236,22 @@ const Index = () => {
           </div>
 
           {/* Learning Paths */}
-          <div className="mb-12">
-            <h3 className="text-2xl font-bold text-foreground mb-6">Your Learning Path</h3>
-            <div className="grid md:grid-cols-2 gap-6">
+          <div className={`mb-12 ${uiConfig.spacing === "loose" ? "mb-16" : ""}`}>
+            <h3 className={`font-bold text-foreground mb-6 ${uiConfig.fontSize === "xl" ? "text-4xl" : uiConfig.fontSize === "lg" ? "text-3xl" : "text-2xl"}`}>
+              Your Learning Path
+            </h3>
+            <div className={`grid gap-6 ${uiConfig.spacing === "loose" ? "gap-8" : ""} ${learningPaths.length > 2 ? "md:grid-cols-2" : "md:grid-cols-1 max-w-2xl"}`}>
               {learningPaths.map((path, index) => (
                 <LearningPathCard
-                  key={index}
-                  {...path}
-                  onStart={() => {
-                    // Here you would navigate to the specific learning module
-                    console.log(`Starting: ${path.title}`);
-                  }}
+                  key={path.id}
+                  title={path.title}
+                  description={path.description}
+                  progress={path.progress}
+                  status={path.status}
+                  estimatedTime={path.estimatedTime}
+                  lessons={path.lessons}
+                  onStart={path.onStart}
+                  delay={index * 200}
                 />
               ))}
             </div>
