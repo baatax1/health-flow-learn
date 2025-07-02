@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { QuizCard } from "@/components/QuizCard";
 import { ProgressCard } from "@/components/ProgressCard";
 import { LearningPathCard } from "@/components/LearningPathCard";
 import { LearningModuleView } from "@/components/LearningModuleView";
+import { ProfileCodeCard } from "@/components/ProfileCodeCard";
 import { useBehavioralAssessment, type AssessmentResult } from "@/hooks/useBehavioralAssessment";
 import { learningModules, getAdaptedContent } from "@/data/learningContent";
 import { getUIConfig, getButtonVariant, getLanguageStyle } from "@/utils/adaptiveUI";
+import { getProfileFromURL, decodeProfile } from "@/utils/profileCodes";
 import { Brain, Heart, Activity, Users, BookOpen, Target } from "lucide-react";
 import heroImage from "@/assets/hero-health.jpg";
 
@@ -18,6 +20,20 @@ const Index = () => {
   const [userProfile, setUserProfile] = useState<AssessmentResult | null>(null);
   const [currentModule, setCurrentModule] = useState<string | null>(null);
   const [completedModules, setCompletedModules] = useState<Set<string>>(new Set());
+  
+  // Check for profile code in URL on load
+  useEffect(() => {
+    const profileCode = getProfileFromURL();
+    if (profileCode) {
+      const decodedProfile = decodeProfile(profileCode);
+      if (decodedProfile) {
+        setUserProfile(decodedProfile);
+        setAppState("dashboard");
+        // Clean URL without reload
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    }
+  }, []);
   
   const {
     currentQuestion,
@@ -278,36 +294,43 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Profile Summary */}
-          <Card className="p-6 bg-gradient-card shadow-glossy border-0">
-            <h3 className="text-xl font-semibold mb-4">Your Learning Profile</h3>
-            <div className="grid md:grid-cols-3 gap-4 text-sm">
-              <div>
-                <span className="text-muted-foreground">Learning Style:</span>
-                <p className="font-medium capitalize">{userProfile.learningStyle}</p>
+          {/* Profile Code and Summary */}
+          <div className="grid md:grid-cols-2 gap-6">
+            <ProfileCodeCard 
+              userProfile={userProfile}
+              onProfileChange={setUserProfile}
+            />
+            
+            <Card className="p-6 bg-gradient-card shadow-glossy border-0">
+              <h3 className="text-xl font-semibold mb-4">Your Learning Profile</h3>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Learning Style:</span>
+                  <p className="font-medium capitalize">{userProfile.learningStyle}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Motivation:</span>
+                  <p className="font-medium capitalize">{userProfile.motivation}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Pace Preference:</span>
+                  <p className="font-medium capitalize">{userProfile.pacePreference}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Challenge Level:</span>
+                  <p className="font-medium capitalize">{userProfile.challengeLevel}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Interface Style:</span>
+                  <p className="font-medium capitalize">{userProfile.interfaceStyle}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Tech Comfort:</span>
+                  <p className="font-medium capitalize">{userProfile.techComfort}</p>
+                </div>
               </div>
-              <div>
-                <span className="text-muted-foreground">Motivation:</span>
-                <p className="font-medium capitalize">{userProfile.motivation}</p>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Pace Preference:</span>
-                <p className="font-medium capitalize">{userProfile.pacePreference}</p>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Challenge Level:</span>
-                <p className="font-medium capitalize">{userProfile.challengeLevel}</p>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Social Learning:</span>
-                <p className="font-medium capitalize">{userProfile.socialLearning}</p>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Session Length:</span>
-                <p className="font-medium capitalize">{userProfile.timePreference}</p>
-              </div>
-            </div>
-          </Card>
+            </Card>
+          </div>
         </div>
       </div>
     );
