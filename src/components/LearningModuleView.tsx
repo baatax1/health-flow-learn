@@ -1,21 +1,25 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, CheckCircle, BookOpen } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle, BookOpen, Trophy, Star } from "lucide-react";
 import { AssessmentResult } from "@/hooks/useBehavioralAssessment";
 import { learningModules, getAdaptedContent, LearningModule } from "@/data/learningContent";
 import { getUIConfig, getButtonVariant } from "@/utils/adaptiveUI";
+import confetti from "canvas-confetti";
 
 interface LearningModuleViewProps {
   moduleId: string;
   userProfile: AssessmentResult;
   onBack: () => void;
+  onModuleComplete: (moduleId: string) => void;
 }
 
-export function LearningModuleView({ moduleId, userProfile, onBack }: LearningModuleViewProps) {
+export function LearningModuleView({ moduleId, userProfile, onBack, onModuleComplete }: LearningModuleViewProps) {
   const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
   const [completedLessons, setCompletedLessons] = useState<Set<number>>(new Set());
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [moduleCompleted, setModuleCompleted] = useState(false);
   
   const module = learningModules.find(m => m.id === moduleId);
   const uiConfig = getUIConfig(userProfile);
@@ -35,11 +39,52 @@ export function LearningModuleView({ moduleId, userProfile, onBack }: LearningMo
   const currentLesson = module.lessons[currentLessonIndex];
   const progress = (completedLessons.size / module.lessons.length) * 100;
 
+  const triggerCelebration = () => {
+    // Confetti animation
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B']
+    });
+    
+    // Additional bursts
+    setTimeout(() => {
+      confetti({
+        particleCount: 50,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0 }
+      });
+    }, 250);
+    
+    setTimeout(() => {
+      confetti({
+        particleCount: 50,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1 }
+      });
+    }, 400);
+  };
+
   const handleNext = () => {
-    setCompletedLessons(prev => new Set(prev).add(currentLessonIndex));
+    const newCompletedLessons = new Set(completedLessons).add(currentLessonIndex);
+    setCompletedLessons(newCompletedLessons);
     
     if (currentLessonIndex < module.lessons.length - 1) {
       setCurrentLessonIndex(currentLessonIndex + 1);
+    } else {
+      // Module completed!
+      setModuleCompleted(true);
+      setShowCelebration(true);
+      triggerCelebration();
+      
+      // Auto-return to dashboard after celebration
+      setTimeout(() => {
+        onModuleComplete(moduleId);
+        onBack();
+      }, 3000);
     }
   };
 
@@ -51,6 +96,37 @@ export function LearningModuleView({ moduleId, userProfile, onBack }: LearningMo
 
   const isLastLesson = currentLessonIndex === module.lessons.length - 1;
   const isFirstLesson = currentLessonIndex === 0;
+  const isCompleted = completedLessons.has(currentLessonIndex);
+
+  // Celebration overlay
+  if (showCelebration) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-hero opacity-20 animate-pulse" />
+        <Card className="p-12 bg-gradient-glass backdrop-blur-xl shadow-large border border-white/20 text-center max-w-lg mx-auto animate-scale-in">
+          <div className="mb-8">
+            <div className="w-24 h-24 bg-gradient-primary mx-auto mb-6 flex items-center justify-center shadow-glow animate-bounce-gentle" style={{ borderRadius: '20px' }}>
+              <Trophy className="h-12 w-12 text-white" />
+            </div>
+            <h1 className="text-4xl font-bold text-foreground mb-4">
+              🎉 Congratulations!
+            </h1>
+            <p className="text-xl text-muted-foreground mb-6">
+              You've completed <span className="font-semibold text-primary">{module.title}</span>!
+            </p>
+            <div className="flex items-center justify-center gap-2 text-health-success">
+              <Star className="h-6 w-6 animate-pulse" />
+              <span className="font-medium">Module Complete</span>
+              <Star className="h-6 w-6 animate-pulse" />
+            </div>
+          </div>
+          <p className="text-muted-foreground">
+            Returning to dashboard in a moment...
+          </p>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -104,8 +180,8 @@ export function LearningModuleView({ moduleId, userProfile, onBack }: LearningMo
               </h2>
             </div>
             
-            {completedLessons.has(currentLessonIndex) && (
-              <div className="flex items-center gap-2 text-health-success mb-4">
+            {isCompleted && (
+              <div className="flex items-center gap-2 text-health-success mb-4 animate-fade-in">
                 <CheckCircle className="h-5 w-5" />
                 <span className="font-medium">Lesson Complete</span>
               </div>
@@ -170,7 +246,7 @@ export function LearningModuleView({ moduleId, userProfile, onBack }: LearningMo
             onClick={handleNext}
             className="flex items-center gap-2"
           >
-            {isLastLesson ? "Complete Module" : "Next Lesson"}
+            {isLastLesson ? "🏆 Complete Module" : "Next Lesson"}
             <ArrowRight className="h-5 w-5" />
           </Button>
         </div>

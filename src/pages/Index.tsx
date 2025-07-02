@@ -17,6 +17,7 @@ const Index = () => {
   const [appState, setAppState] = useState<AppState>("welcome");
   const [userProfile, setUserProfile] = useState<AssessmentResult | null>(null);
   const [currentModule, setCurrentModule] = useState<string | null>(null);
+  const [completedModules, setCompletedModules] = useState<Set<string>>(new Set());
   
   const {
     currentQuestion,
@@ -47,8 +48,9 @@ const Index = () => {
       id: module.id,
       title: module.title,
       description: module.description,
-      progress: 0,
-      status: index === 0 ? "available" as const : "locked" as const,
+      progress: completedModules.has(module.id) ? 100 : 0,
+      status: (index === 0 || completedModules.has(learningModules[index - 1]?.id)) ? "available" as const : 
+               completedModules.has(module.id) ? "completed" as const : "locked" as const,
       estimatedTime: module.duration,
       lessons: module.lessons.length,
       content: module.lessons.map(lesson => ({
@@ -317,6 +319,9 @@ const Index = () => {
         moduleId={currentModule}
         userProfile={userProfile}
         onBack={() => setAppState("dashboard")}
+        onModuleComplete={(moduleId) => {
+          setCompletedModules(prev => new Set(prev).add(moduleId));
+        }}
       />
     );
   }
