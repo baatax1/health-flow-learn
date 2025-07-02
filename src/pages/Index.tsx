@@ -76,28 +76,30 @@ const Index = () => {
     return (
       <div className="min-h-screen bg-background">
         {/* Hero Section */}
-        <section className="relative overflow-hidden">
+        <section className="relative overflow-hidden min-h-screen flex items-center">
           <div 
-            className="absolute inset-0 bg-cover bg-center opacity-20"
+            className="absolute inset-0 bg-cover bg-center opacity-10"
             style={{ backgroundImage: `url(${heroImage})` }}
           />
-          <div className="relative max-w-6xl mx-auto px-6 py-24">
-            <div className="text-center max-w-4xl mx-auto">
-              <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
+          <div className="absolute inset-0 bg-gradient-hero opacity-20" />
+          
+          <div className="relative max-w-6xl mx-auto px-6 py-24 text-center">
+            <div className="max-w-4xl mx-auto animate-fade-in-up">
+              <h1 className="text-6xl md:text-7xl font-bold text-foreground mb-8 leading-none tracking-tight">
                 Personalized Health
-                <span className="bg-gradient-primary bg-clip-text text-transparent block">
+                <span className="block bg-gradient-hero bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]">
                   Learning Journey
                 </span>
               </h1>
-              <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
+              <p className="text-2xl text-muted-foreground mb-12 leading-relaxed font-light max-w-3xl mx-auto">
                 Master health concepts through adaptive learning powered by behavioral science. 
                 Get a personalized curriculum that matches your unique learning style.
               </p>
               <Button 
-                variant="health" 
-                size="lg"
+                variant="apple-primary" 
+                size="xl"
                 onClick={handleStartAssessment}
-                className="text-lg px-8 py-4 h-auto"
+                className="text-2xl px-12 py-6 h-auto shadow-glow hover:shadow-large animate-bounce-gentle"
               >
                 Start Your Assessment
               </Button>
@@ -106,37 +108,21 @@ const Index = () => {
         </section>
 
         {/* Features Section */}
-        <section className="max-w-6xl mx-auto px-6 py-16">
+        <section className="max-w-6xl mx-auto px-6 py-24">
           <div className="grid md:grid-cols-3 gap-8">
-            <Card className="p-8 bg-gradient-card shadow-glossy border-0 text-center hover:shadow-elevated transition-all duration-200">
-              <div className="w-16 h-16 bg-gradient-primary mx-auto mb-6 flex items-center justify-center shadow-card">
-                <Brain className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold mb-4">Adaptive Learning</h3>
-              <p className="text-muted-foreground">
-                AI-powered algorithm that adapts to your pace, preferences, and progress.
-              </p>
-            </Card>
-
-            <Card className="p-8 bg-gradient-card shadow-glossy border-0 text-center hover:shadow-elevated transition-all duration-200">
-              <div className="w-16 h-16 bg-gradient-secondary mx-auto mb-6 flex items-center justify-center shadow-card">
-                <Target className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold mb-4">Behavioral Science</h3>
-              <p className="text-muted-foreground">
-                Evidence-based approach using psychology to optimize your learning experience.
-              </p>
-            </Card>
-
-            <Card className="p-8 bg-gradient-card shadow-glossy border-0 text-center hover:shadow-elevated transition-all duration-200">
-              <div className="w-16 h-16 bg-health-accent mx-auto mb-6 flex items-center justify-center shadow-card">
-                <Heart className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold mb-4">Health-Focused</h3>
-              <p className="text-muted-foreground">
-                Comprehensive health education covering nutrition, fitness, and wellness.
-              </p>
-            </Card>
+            {[
+              { icon: Brain, title: "Adaptive Learning", desc: "AI-powered algorithm that adapts to your pace, preferences, and progress.", delay: 0 },
+              { icon: Target, title: "Behavioral Science", desc: "Evidence-based approach using psychology to optimize your learning experience.", delay: 200 },
+              { icon: Heart, title: "Health-Focused", desc: "Comprehensive health education covering nutrition, fitness, and wellness.", delay: 400 }
+            ].map((feature, index) => (
+              <Card key={index} className="p-10 bg-gradient-glass backdrop-blur-xl shadow-glass border border-white/10 text-center hover:shadow-large transition-all duration-500 hover:scale-[1.02] group animate-fade-in" style={{ animationDelay: `${feature.delay}ms` }}>
+                <div className="w-20 h-20 bg-gradient-primary mx-auto mb-8 flex items-center justify-center shadow-glow group-hover:shadow-large transition-all duration-300 group-hover:scale-110" style={{ borderRadius: '20px' }}>
+                  <feature.icon className="h-10 w-10 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold mb-6 tracking-tight">{feature.title}</h3>
+                <p className="text-muted-foreground leading-relaxed text-lg">{feature.desc}</p>
+              </Card>
+            ))}
           </div>
         </section>
       </div>
