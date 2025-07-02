@@ -4,17 +4,19 @@ import { Card } from "@/components/ui/card";
 import { QuizCard } from "@/components/QuizCard";
 import { ProgressCard } from "@/components/ProgressCard";
 import { LearningPathCard } from "@/components/LearningPathCard";
+import { LearningModuleView } from "@/components/LearningModuleView";
 import { useBehavioralAssessment, type AssessmentResult } from "@/hooks/useBehavioralAssessment";
 import { learningModules, getAdaptedContent } from "@/data/learningContent";
 import { getUIConfig, getButtonVariant, getLanguageStyle } from "@/utils/adaptiveUI";
 import { Brain, Heart, Activity, Users, BookOpen, Target } from "lucide-react";
 import heroImage from "@/assets/hero-health.jpg";
 
-type AppState = "welcome" | "assessment" | "dashboard";
+type AppState = "welcome" | "assessment" | "dashboard" | "learning";
 
 const Index = () => {
   const [appState, setAppState] = useState<AppState>("welcome");
   const [userProfile, setUserProfile] = useState<AssessmentResult | null>(null);
+  const [currentModule, setCurrentModule] = useState<string | null>(null);
   
   const {
     currentQuestion,
@@ -54,7 +56,8 @@ const Index = () => {
         adaptedContent: getAdaptedContent(lesson.content, profile)
       })),
       onStart: () => {
-        console.log(`Starting: ${module.title} (adapted for ${profile.interfaceStyle} interface)`);
+        setCurrentModule(module.id);
+        setAppState("learning");
       }
     }));
   };
@@ -308,6 +311,15 @@ const Index = () => {
     );
   }
 
+  if (appState === "learning" && userProfile && currentModule) {
+    return (
+      <LearningModuleView
+        moduleId={currentModule}
+        userProfile={userProfile}
+        onBack={() => setAppState("dashboard")}
+      />
+    );
+  }
   return null;
 };
 
