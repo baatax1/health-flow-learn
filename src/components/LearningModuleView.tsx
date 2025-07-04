@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, CheckCircle, BookOpen, Trophy, Star } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle, BookOpen, Trophy, Star, MessageCircle } from "lucide-react";
 import { AssessmentResult } from "@/hooks/useBehavioralAssessment";
 import { learningModules, getAdaptedContent, LearningModule } from "@/data/learningContent";
 import { getUIConfig, getButtonVariant } from "@/utils/adaptiveUI";
+import { ConversationalTutorView } from "@/components/ConversationalTutorView";
 import confetti from "canvas-confetti";
 
 interface LearningModuleViewProps {
@@ -20,6 +21,7 @@ export function LearningModuleView({ moduleId, userProfile, onBack, onModuleComp
   const [completedLessons, setCompletedLessons] = useState<Set<number>>(new Set());
   const [showCelebration, setShowCelebration] = useState(false);
   const [moduleCompleted, setModuleCompleted] = useState(false);
+  const [showConversationalMode, setShowConversationalMode] = useState(false);
   
   const module = learningModules.find(m => m.id === moduleId);
   const uiConfig = getUIConfig(userProfile);
@@ -97,6 +99,23 @@ export function LearningModuleView({ moduleId, userProfile, onBack, onModuleComp
   const isLastLesson = currentLessonIndex === module.lessons.length - 1;
   const isFirstLesson = currentLessonIndex === 0;
   const isCompleted = completedLessons.has(currentLessonIndex);
+  const hasConversationalMode = currentLesson.conversationalEnabled;
+
+  // Show conversational mode if enabled
+  if (showConversationalMode && hasConversationalMode) {
+    return (
+      <ConversationalTutorView
+        module={module}
+        lesson={currentLesson}
+        userProfile={userProfile}
+        onBack={() => setShowConversationalMode(false)}
+        onNext={handleNext}
+        onPrevious={handlePrevious}
+        isFirstLesson={isFirstLesson}
+        isLastLesson={isLastLesson}
+      />
+    );
+  }
 
   // Celebration overlay
   if (showCelebration) {
@@ -180,12 +199,26 @@ export function LearningModuleView({ moduleId, userProfile, onBack, onModuleComp
               </h2>
             </div>
             
-            {isCompleted && (
-              <div className="flex items-center gap-2 text-health-success mb-4 animate-fade-in">
-                <CheckCircle className="h-5 w-5" />
-                <span className="font-medium">Lesson Complete</span>
-              </div>
-            )}
+            <div className="flex items-center justify-between mb-4">
+              {isCompleted && (
+                <div className="flex items-center gap-2 text-health-success animate-fade-in">
+                  <CheckCircle className="h-5 w-5" />
+                  <span className="font-medium">Lesson Complete</span>
+                </div>
+              )}
+              
+              {hasConversationalMode && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowConversationalMode(true)}
+                  className="flex items-center gap-2 ml-auto"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  Talk with Tutor
+                </Button>
+              )}
+            </div>
           </div>
 
           <div className={`prose prose-lg max-w-none ${uiConfig.fontSize === "xl" ? "prose-xl" : ""}`}>

@@ -12,7 +12,7 @@ export interface LearningModule {
 export interface LessonContent {
   id: string;
   title: string;
-  type: "text" | "video" | "interactive" | "quiz";
+  type: "text" | "video" | "interactive" | "quiz" | "conversational";
   content: {
     simple?: string;
     standard?: string;
@@ -20,6 +20,7 @@ export interface LessonContent {
   };
   visualAids?: string[];
   audioScript?: string;
+  conversationalEnabled?: boolean;
 }
 
 export interface QuizQuestion {
@@ -62,7 +63,8 @@ export const learningModules: LearningModule[] = [
           advanced: "The cardiovascular system consists of the heart, blood vessels, and blood. The heart's four chambers work in coordination to maintain systemic and pulmonary circulation, ensuring optimal tissue perfusion."
         },
         visualAids: ["heart-diagram-simple.svg", "blood-flow-animation.gif"],
-        audioScript: "Let me tell you about your amazing heart..."
+        audioScript: "Let me tell you about your amazing heart...",
+        conversationalEnabled: true
       },
       {
         id: "blood-pressure-basics",
@@ -72,7 +74,8 @@ export const learningModules: LearningModule[] = [
           simple: "Blood pressure is how hard your blood pushes against your blood vessel walls. Normal is usually around 120/80.",
           standard: "Blood pressure measures the force of blood against artery walls. It's recorded as two numbers: systolic (top) and diastolic (bottom) pressure.",
           advanced: "Blood pressure represents the hemodynamic force exerted by circulating blood on arterial walls. Systolic pressure reflects ventricular contraction, while diastolic represents ventricular relaxation and arterial elasticity."
-        }
+        },
+        conversationalEnabled: true
       },
       {
         id: "heart-healthy-habits",
@@ -82,7 +85,8 @@ export const learningModules: LearningModule[] = [
           simple: "Eat good foods. Move your body. Don't smoke. Get enough sleep. These help your heart stay strong.",
           standard: "Maintain heart health through regular exercise, a balanced diet rich in fruits and vegetables, adequate sleep, stress management, and avoiding tobacco.",
           advanced: "Cardiovascular risk reduction involves multiple lifestyle interventions: aerobic exercise (150 min/week), Mediterranean-style diet, optimal sleep hygiene (7-9 hours), stress reduction techniques, and smoking cessation."
-        }
+        },
+        conversationalEnabled: true
       }
     ],
     quizQuestions: [
@@ -140,7 +144,8 @@ export const learningModules: LearningModule[] = [
           simple: "Your body needs three main types of food: carbs for energy, protein to build muscles, and healthy fats for your brain.",
           standard: "Macronutrients include carbohydrates (energy), proteins (tissue building and repair), and fats (hormone production and brain function).",
           advanced: "Macronutrients provide energy and structural components: carbohydrates (4 kcal/g) for immediate energy, proteins (4 kcal/g) for tissue synthesis and enzymatic functions, and lipids (9 kcal/g) for membrane integrity and signaling molecules."
-        }
+        },
+        conversationalEnabled: true
       },
       {
         id: "portion-control",
@@ -150,7 +155,8 @@ export const learningModules: LearningModule[] = [
           simple: "Use your hand to measure food. Your palm = protein. Your fist = vegetables. Your thumb = healthy fats.",
           standard: "Practice portion control using hand measurements as guides. Fill half your plate with vegetables, quarter with lean protein, quarter with whole grains.",
           advanced: "Implement evidence-based portion control strategies using anthropometric measurements. Follow the MyPlate guidelines: 50% non-starchy vegetables, 25% lean protein, 25% complex carbohydrates."
-        }
+        },
+        conversationalEnabled: true
       }
     ],
     quizQuestions: [
